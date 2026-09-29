@@ -1,0 +1,166 @@
+/*
+ * B站氛围光 — page styles.
+ * Everything page-related is scoped to attributes set by content.js on <html>, so nothing
+ * changes until a video player is found and the extension is enabled.
+ */
+
+/* ------------------------------------------------------------------ light layer */
+
+.bal-root {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: -1 !important; /* Behind all page content, above the (transparent) page background */
+  display: block !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+  user-select: none !important;
+  contain: strict;
+  isolation: isolate;
+  background: var(--bal-bg, #000);
+}
+
+.bal-canvas {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+}
+
+/* Dithering noise against color banding in dark gradients */
+.bal-noise {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-repeat: repeat;
+  mix-blend-mode: overlay;
+  opacity: 0;
+}
+
+/* ------------------------------------------------------------------ transparent page */
+
+html[data-bal="on"],
+html[data-bal="on"] > body,
+html[data-bal="on"] #app,
+html[data-bal="on"] [data-bal-clear="page"] {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+/* Player internals: only while the light is drawn (keeps black bars in web fullscreen / mini) */
+html[data-bal-light] [data-bal-clear="player"],
+html[data-bal-light] #bilibili-player-placeholder,
+html[data-bal-light] #bilibili-player-placeholder-top,
+html[data-bal-light] #bilibili-player-placeholder-bottom,
+html[data-bal-light] .bpx-player-video-area {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+/* Player box shadows would draw dark outlines into the light (visible through letterboxing) */
+html[data-bal-light] :is(#bilibili-player-placeholder, .bpx-player-container, [data-bal-clear]) {
+  box-shadow: none !important;
+}
+
+html[data-bal-light] .bpx-player-sending-bar {
+  background-color: rgb(0 0 0 / calc(var(--bal-card-alpha, 0.08) + 0.2)) !important;
+}
+
+/* ------------------------------------------------------------------ header */
+
+html[data-bal="on"][data-bal-header] #biliMainHeader,
+html[data-bal="on"][data-bal-header] #biliMainHeader .bili-header {
+  background-color: transparent !important;
+}
+
+html[data-bal="on"][data-bal-header] .bili-header__bar {
+  background-color: rgb(0 0 0 / 22%) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: blur(24px) saturate(140%);
+  backdrop-filter: blur(24px) saturate(140%);
+}
+
+/* ------------------------------------------------------------------ dark palette */
+
+/*
+ * Overrides Bilibili's theme variables (and BewlyBewly's) with a dark, translucent palette.
+ * Also declared on body, #app and the page containers around the player, because themes set
+ * these variables on those elements too (e.g. body.dark, #app).
+ */
+html[data-bal="on"][data-bal-dark] {
+  color-scheme: dark;
+  scrollbar-color: rgb(255 255 255 / 22%) transparent;
+}
+
+html[data-bal="on"][data-bal-dark],
+html[data-bal="on"][data-bal-dark] > body,
+html[data-bal="on"][data-bal-dark] #app,
+html[data-bal="on"][data-bal-dark] [data-bal-clear="page"] {
+  --bal-card: rgb(255 255 255 / var(--bal-card-alpha, 0.08));
+  --bal-card-thin: rgb(255 255 255 / calc(var(--bal-card-alpha, 0.08) * 0.6));
+  --bal-card-thick: rgb(255 255 255 / calc(var(--bal-card-alpha, 0.08) * 1.6));
+  --bal-float: #1d1e22;
+
+  --bg1: transparent !important;
+  --bg2: var(--bal-card) !important;
+  --bg3: var(--bal-card-thick) !important;
+  --bg1_float: var(--bal-float) !important;
+  --bg2_float: #26272c !important;
+  --graph_bg_thin: var(--bal-card-thin) !important;
+  --graph_bg_regular: var(--bal-card) !important;
+  --graph_bg_thick: var(--bal-card-thick) !important;
+  --Wh0: #17181a !important;
+
+  /* Secondary text stays fairly opaque: the light behind it can be very bright */
+  --text1: #f5f6f7 !important;
+  --text2: rgb(245 246 247 / 86%) !important;
+  --text3: rgb(245 246 247 / 70%) !important;
+  --text4: rgb(245 246 247 / 52%) !important;
+  --line_light: rgb(255 255 255 / 6%) !important;
+  --line_regular: rgb(255 255 255 / 12%) !important;
+  --line_bold: rgb(255 255 255 / 20%) !important;
+
+  --Ga0: rgb(255 255 255 / 3%) !important;
+  --Ga1: rgb(255 255 255 / 6%) !important;
+  --Ga1_s: rgb(255 255 255 / 6%) !important;
+  --Ga2: rgb(255 255 255 / 12%) !important;
+  --Ga3: rgb(255 255 255 / 20%) !important;
+  --Ga4: rgb(255 255 255 / 32%) !important;
+  --Ga5: rgb(255 255 255 / 62%) !important;
+  --Ga6: rgb(255 255 255 / 68%) !important;
+  --Ga7: rgb(255 255 255 / 76%) !important;
+  --Ga8: rgb(255 255 255 / 82%) !important;
+  --Ga9: rgb(255 255 255 / 88%) !important;
+  --Ga10: rgb(255 255 255 / 94%) !important;
+
+  /* BewlyBewly */
+  --bew-bg: transparent !important;
+  --bew-content: var(--bal-card) !important;
+}
+
+/*
+ * Some themes (BewlyBewly's dark mode) redeclare the text colors on every element, so only
+ * inheriting from <html> isn't enough. Text colors are safe to force everywhere; background
+ * variables are not (popups must stay opaque), so those stay on the containers above.
+ */
+html[data-bal="on"][data-bal-dark] * {
+  --text1: #f5f6f7 !important;
+  --text2: rgb(245 246 247 / 86%) !important;
+  --text3: rgb(245 246 247 / 70%) !important;
+  --text4: rgb(245 246 247 / 52%) !important;
+}
+
+/* ------------------------------------------------------------------ readability */
+
+html[data-bal="on"][data-bal-shadow] > body {
+  text-shadow: 0 0 2px rgb(0 0 0 / 55%), 0 0 10px rgb(0 0 0 / 45%);
+}
+
+/* Icons (svg) get a matching soft shadow */
+html[data-bal="on"][data-bal-shadow] :is(#app, .bili-header) svg {
+  filter: drop-shadow(0 0 3px rgb(0 0 0 / 45%));
+}
+
+/* Keep inputs and danmaku (which style their own outlines) unchanged */
+html[data-bal="on"][data-bal-shadow] :is(input, textarea, [contenteditable="true"], .bpx-player-row-dm-wrap) {
+  text-shadow: none;
+}

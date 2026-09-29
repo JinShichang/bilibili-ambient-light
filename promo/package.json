@@ -1,0 +1,26 @@
+{
+  "name": "bilibili-ambient-promo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Promo video for the B站氛围光 extension, built with Remotion",
+  "scripts": {
+    "record": "node scripts/record.mjs record --session bili-promo-a,bili-promo-b",
+    "record:popup": "node scripts/record.mjs popup --session bili-promo-a",
+    "encode": "node scripts/encode.mjs",
+    "store:shots": "node scripts/store-shots.mjs --session bili-promo-a",
+    "store:stills": "remotion still StoreCompare ../store/screenshots/1-compare.png --bundle-cache=false && remotion still StoreTile ../store/promo-tile-440x280.png --bundle-cache=false",
+    "studio": "remotion studio",
+    "render": "remotion render Promo out/bilibili-ambient-promo.mp4",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.529",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "remotion": "4.0.529"
+  },
+  "devDependencies": {
+    "@types/react": "19.3.0",
+    "typescript": "5.9.3"
+  }
+}

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="color-scheme" content="dark" />
+    <title>B站氛围光</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header class="head">
+      <img src="../icons/icon-32.png" alt="" width="24" height="24" />
+      <h1>B站氛围光</h1>
+      <label class="switch" title="启用氛围光">
+        <input type="checkbox" id="enabled" role="switch" />
+        <span class="switch-track" aria-hidden="true"></span>
+        <span class="sr-only">启用氛围光</span>
+      </label>
+    </header>
+
+    <section class="presets" aria-labelledby="presets-title">
+      <h2 id="presets-title">预设</h2>
+      <div class="preset-row" id="presets"></div>
+    </section>
+
+    <main id="controls"></main>
+
+    <footer class="foot">
+      <button type="button" id="reset">恢复默认</button>
+      <p class="hint">调整会实时应用到已打开的 B 站视频页</p>
+    </footer>
+
+    <script src="../src/settings.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>
