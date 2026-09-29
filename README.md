@@ -15,9 +15,11 @@
 
 ## 安装
 
-**Chrome 应用商店**：审核中，通过后会在这里放链接。
+**Chrome 应用商店**（推荐）：[B站氛围光 · Ambient Light for Bilibili](https://chromewebstore.google.com/detail/jeooggamefikdijnbfbabphhffbmmjkn)
 
-**手动安装**（开发版）：
+Edge 用户也可以从上面的链接安装：页面上方出现提示时，选择「允许来自其他应用商店的扩展」即可。
+
+**手动安装**（开发版，用于调试代码）：
 
 1. 下载或克隆本仓库。
 2. 打开 `chrome://extensions`，开启右上角的「开发者模式」。
