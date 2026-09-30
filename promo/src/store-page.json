@@ -1,0 +1,125 @@
+{
+ "zoom": 2.2,
+ "viewport": {
+  "width": 1745,
+  "height": 982
+ },
+ "query": "B站氛围光",
+ "cleaned": [
+  "改用\\s*Chrome -> DIV 348x219",
+  "改用\\s*Chrome -> DIV 348x219",
+  "切换到\\s*Chrome\\s*即可安装 -> DIV 1072x56"
+ ],
+ "searchTitle": "Chrome 应用商店 - 搜索结果",
+ "searchUrl": "https://chromewebstore.google.com/search/B站氛围光?hl=zh-CN",
+ "searchCard": {
+  "x": 464.5,
+  "y": 144,
+  "width": 1072,
+  "height": 207
+ },
+ "searchBox": {
+  "input": {
+   "x": 743.453125,
+   "y": 20,
+   "width": 266,
+   "height": 24
+  },
+  "box": {
+   "x": 691.453125,
+   "y": 10,
+   "width": 394,
+   "height": 44
+  },
+  "fontSize": 16,
+  "textColor": "rgb(31, 31, 31)",
+  "caretStart": 743.453125,
+  "carets": [
+   753.5171203613281,
+   769.5171203613281,
+   785.5171203613281,
+   801.5171203613281,
+   817.5171203613281
+  ]
+ },
+ "favicon": {
+  "href": "https://ssl.gstatic.com/chrome/webstore/images/icon_144px.png",
+  "loaded": true
+ },
+ "resultsHidden": {
+  "tag": "SECTION",
+  "width": 1072,
+  "visibility": "hidden"
+ },
+ "buttonRestyled": true,
+ "installButton": {
+  "x": 1262.875,
+  "y": 134,
+  "width": 145.625,
+  "height": 40,
+  "label": "添加至 Chrome",
+  "disabled": false,
+  "background": "rgb(11, 87, 208)",
+  "radius": "20px"
+ },
+ "detail": {
+  "title": "B站氛围光 · Ambient Light for Bilibili - Chrome 应用商店",
+  "h1": {
+   "x": 412.5,
+   "y": 133.5,
+   "width": 724,
+   "height": 41
+  },
+  "privacy": {
+   "x": 336.5,
+   "y": 1859.078125,
+   "width": 1072,
+   "height": 24
+  },
+  "headings": {
+   "概述": {
+    "x": 336.5,
+    "y": 874.671875,
+    "width": 56,
+    "height": 36
+   },
+   "详情": {
+    "x": 336.5,
+    "y": 1508.375,
+    "width": 56,
+    "height": 36
+   },
+   "隐私权": {
+    "x": 336.5,
+    "y": 1799.84375,
+    "width": 84,
+    "height": 36
+   },
+   "支持": {
+    "x": 336.5,
+    "y": 2087.3125,
+    "width": 56,
+    "height": 36
+   },
+   "相关": {
+    "x": 336.5,
+    "y": 2219.546875,
+    "width": 1072,
+    "height": 36
+   }
+  },
+  "pinned": [
+   {
+    "pos": "fixed",
+    "tag": "HEADER",
+    "x": 0,
+    "y": 0,
+    "width": 1745,
+    "height": 100
+   }
+  ],
+  "height": 2699
+ },
+ "detailUrl": "https://chromewebstore.google.com/detail/b站氛围光-·-ambient-light-for/jeooggamefikdijnbfbabphhffbmmjkn?hl=zh-CN",
+ "detailHeight": 2600
+}

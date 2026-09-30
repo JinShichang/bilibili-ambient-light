@@ -72,12 +72,14 @@ npm install
 npm run record         # 逐帧录制 B 站页面
 npm run record:popup   # 截取设置弹窗
 npm run encode         # 合成片段
+npm run music          # 配乐：从仓库根目录的音频文件第 33 秒起截取，并分析节拍（剪辑点对齐节拍）
+npm run store:page     # 截取 Chrome 应用商店的搜索页和详情页（宣传片里的下载演示，用无头 Chrome，不登录）
 npm run render         # 输出 promo/out/bilibili-ambient-promo.mp4
 npm run store:shots    # 截取商店截图
 npm run store:stills   # 合成对比图和宣传图块
 ```
 
-录制的视频素材来自其他 UP 主的投稿，受版权保护，所以没有放进仓库。
+录制的视频素材和配乐受版权保护，所以没有放进仓库。
 
 ## 声明
 

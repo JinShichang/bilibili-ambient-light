@@ -8,7 +8,10 @@ promo/out/
 promo/recordings/
 promo/public/clips/
 promo/public/store/
-promo/public/music.mp3
+
+# Soundtrack: third-party music, prepare it locally with `npm run music` (see README)
+*.flac
+promo/public/music.*
 
 # OS / editor
 .DS_Store

@@ -7,6 +7,8 @@
     "record": "node scripts/record.mjs record --session bili-promo-a,bili-promo-b",
     "record:popup": "node scripts/record.mjs popup --session bili-promo-a",
     "encode": "node scripts/encode.mjs",
+    "music": "node scripts/music.mjs --start 33 --length 90",
+    "store:page": "node scripts/store-page.mjs",
     "store:shots": "node scripts/store-shots.mjs --session bili-promo-a",
     "store:stills": "remotion still StoreCompare ../store/screenshots/1-compare.png --bundle-cache=false && remotion still StoreTile ../store/promo-tile-440x280.png --bundle-cache=false",
     "studio": "remotion studio",

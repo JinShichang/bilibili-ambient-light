@@ -1,26 +1,69 @@
 import React from 'react';
 import { AbsoluteFill, Audio, Sequence, getStaticFiles, interpolate, staticFile } from 'remotion';
+import beats from './beats.json';
 import { FadeIn } from './components';
-import { Compare, Feature, Intro, Outro, Settings } from './scenes';
-import { CLIPS } from './theme';
+import { Compare, Feature, Montage, MontagePart, Outro, Settings } from './scenes';
+import { StoreScene } from './StoreScene';
+import { CLIPS, FPS } from './theme';
 
-const FADE = 12; // Crossfade length between scenes (frames)
+/*
+ * Scene lengths are counted in beats of the soundtrack (src/beats.json, from scripts/music.mjs),
+ * so every cut lands on the music. The beat grid starts at the first detected beat.
+ */
+const BEAT_SECONDS = 60 / beats.bpm;
+const BEAT_FRAMES = BEAT_SECONDS * FPS;
+const beatFrame = (n: number) => Math.round((beats.firstBeat + n * BEAT_SECONDS) * FPS);
 
-type SceneDef = { id: string; duration: number; render: (duration: number) => React.ReactNode };
+const FADE = 12; // Default crossfade (frames); the transition midpoint sits on the beat.
+const END_FADE = 36;
 
+type SceneDef = {
+  id: string;
+  beats: number;
+  fade?: number;
+  render: (duration: number, startBeat: number, from: number) => React.ReactNode;
+};
+
+/** Montage parts in beats, converted to frames relative to the montage's start. */
+const MONTAGE_PARTS: Array<{ clip: MontagePart['clip']; label: string; beats: number }> = [
+  { clip: CLIPS.lnd, label: '英雄联盟《Legends Never Die》', beats: 3 },
+  { clip: CLIPS.wuwa, label: '鸣潮 × 赛博朋克：边缘行者', beats: 4 },
+  { clip: CLIPS.wuwa2, label: '鸣潮', beats: 2 },
+  { clip: CLIPS.endfield, label: '明日方舟：终末地', beats: 3 },
+  { clip: CLIPS.kurumi, label: 'FX战士久留美', beats: 4 },
+];
+
+/*
+ * Opens directly on the before/after comparison: the effect itself is the hook. The soundtrack
+ * dips at beat 41 (settings) and turns calm at beats 62-64 (outro).
+ */
 const SCENES: SceneDef[] = [
-  { id: 'intro', duration: 100, render: () => <Intro /> },
-  { id: 'compare', duration: 150, render: (d) => <Compare duration={d} /> },
+  { id: 'compare', beats: 6, render: (d) => <Compare duration={d} /> },
+  {
+    id: 'montage',
+    beats: MONTAGE_PARTS.reduce((sum, p) => sum + p.beats, 0),
+    fade: 2, // hard cut + flash
+    render: (d, startBeat, from) => {
+      let beat = startBeat;
+      const parts = MONTAGE_PARTS.map((p, i) => {
+        const partFrom = i === 0 ? 0 : beatFrame(beat) - from;
+        beat += p.beats;
+        const partEnd = i === MONTAGE_PARTS.length - 1 ? d : beatFrame(beat) - from;
+        return { clip: p.clip, label: p.label, from: partFrom, duration: partEnd - partFrom };
+      });
+      return <Montage duration={d} parts={parts} title="游戏 CG、二游 PV、当季新番，一样沉浸" subtitle="画面越炫，氛围光越出彩" />;
+    },
+  },
   {
     id: 'sky',
-    duration: 140,
+    beats: 5,
     render: (d) => (
       <Feature clip={CLIPS.sky} duration={d} title="实时跟随画面变化" subtitle="逐帧取色，柔和扩散，自然渐隐到页面边缘" />
     ),
   },
   {
     id: 'cinema',
-    duration: 140,
+    beats: 5,
     render: (d) => (
       <Feature
         clip={CLIPS.cinema}
@@ -31,49 +74,75 @@ const SCENES: SceneDef[] = [
     ),
   },
   {
-    id: 'landscape',
-    duration: 140,
+    id: 'iceland',
+    beats: 5,
     render: (d) => (
       <Feature
-        clip={CLIPS.landscape}
+        clip={CLIPS.iceland}
         duration={d}
-        title="宽屏模式同样生效"
-        subtitle="播放器变大，光晕也随之铺满整个页面"
+        title="通透页面，内容依旧清晰"
+        subtitle="页面切换为半透明深色主题并加上文字阴影，光再亮也看得清"
       />
     ),
   },
-  { id: 'settings', duration: 165, render: () => <Settings /> },
-  { id: 'outro', duration: 120, render: () => <Outro /> },
+  {
+    id: 'landscape',
+    beats: 4, // the recording is one 106-frame drone shot
+    render: (d) => (
+      <Feature clip={CLIPS.landscape} duration={d} title="宽屏模式同样生效" subtitle="播放器变大，光晕也随之铺满整个页面" />
+    ),
+  },
+  { id: 'settings', beats: 7, render: () => <Settings /> },
+  // The real store pages: search, open the listing, 添加至 Chrome, privacy section.
+  { id: 'store', beats: 14, render: () => <StoreScene beat={BEAT_FRAMES} lead={Math.floor(FADE / 2)} /> },
+  { id: 'outro', beats: 10, render: () => <Outro beat={Math.round(BEAT_FRAMES)} /> },
 ];
 
-// Each scene starts FADE frames before the previous one ends and fades in on top of it.
-const TIMELINE = SCENES.reduce<Array<SceneDef & { from: number }>>((list, scene, i) => {
-  const prev = list[i - 1];
-  list.push({ ...scene, from: prev ? prev.from + prev.duration - FADE : 0 });
-  return list;
-}, []);
+type TimelineEntry = SceneDef & { from: number; duration: number; startBeat: number };
 
-export const PROMO_DURATION = TIMELINE[TIMELINE.length - 1].from + TIMELINE[TIMELINE.length - 1].duration;
+// Scene i covers [boundary(i-1) - fade/2, boundary(i) + nextFade/2]: crossfades are centered on beats.
+const TIMELINE: TimelineEntry[] = (() => {
+  const bounds: number[] = [];
+  const starts: number[] = [];
+  let cum = 0;
+  for (const scene of SCENES) {
+    starts.push(cum);
+    cum += scene.beats;
+    bounds.push(beatFrame(cum));
+  }
+  return SCENES.map((scene, i) => {
+    const fadeIn = i === 0 ? 0 : scene.fade ?? FADE;
+    const from = i === 0 ? 0 : bounds[i - 1] - Math.floor(fadeIn / 2);
+    const next = SCENES[i + 1];
+    const end = next ? bounds[i] + Math.ceil((next.fade ?? FADE) / 2) : bounds[i];
+    return { ...scene, fade: fadeIn, from, duration: end - from, startBeat: starts[i] };
+  });
+})();
 
-/** Optional soundtrack: drop a music.mp3 into promo/public/ and it is mixed in with fades. */
-const music = getStaticFiles().find((file) => file.name === 'music.mp3');
+const LAST = TIMELINE[TIMELINE.length - 1];
+export const PROMO_DURATION = LAST.from + LAST.duration;
+
+/** Soundtrack prepared by scripts/music.mjs (already starts at the chosen offset in the song). */
+const hasMusic = getStaticFiles().some((file) => file.name === 'music.wav');
 
 export const Promo: React.FC = () => (
   <AbsoluteFill style={{ backgroundColor: '#000' }}>
     {TIMELINE.map((scene, i) => (
       <Sequence key={scene.id} name={scene.id} from={scene.from} durationInFrames={scene.duration}>
-        <FadeIn duration={scene.duration} fade={FADE} fadeOut={i === TIMELINE.length - 1}>
-          {scene.render(scene.duration)}
+        <FadeIn duration={scene.duration} fade={scene.fade ?? FADE} fadeOut={i === TIMELINE.length - 1 ? END_FADE : 0}>
+          {scene.render(scene.duration, scene.startBeat, scene.from)}
         </FadeIn>
       </Sequence>
     ))}
-    {music ? (
+    {hasMusic ? (
       <Audio
-        src={staticFile('music.mp3')}
-        volume={(f) => interpolate(f, [0, 30, PROMO_DURATION - 45, PROMO_DURATION], [0, 0.8, 0.8, 0], {
-          extrapolateLeft: 'clamp',
-          extrapolateRight: 'clamp',
-        })}
+        src={staticFile('music.wav')}
+        volume={(f) =>
+          interpolate(f, [0, 8, PROMO_DURATION - 54, PROMO_DURATION], [0, 0.85, 0.85, 0], {
+            extrapolateLeft: 'clamp',
+            extrapolateRight: 'clamp',
+          })
+        }
       />
     ) : null}
   </AbsoluteFill>

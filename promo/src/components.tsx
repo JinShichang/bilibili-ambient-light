@@ -81,18 +81,17 @@ export const GlowBackground: React.FC = () => {
   );
 };
 
-/** Fades a scene in (it is layered on top of the previous one) and optionally out. */
-export const FadeIn: React.FC<{ duration: number; fade: number; fadeOut?: boolean; children: React.ReactNode }> = ({
+/** Fades a scene in over `fade` frames (it is layered on top of the previous one), optionally out at the end. */
+export const FadeIn: React.FC<{ duration: number; fade: number; fadeOut?: number; children: React.ReactNode }> = ({
   duration,
   fade,
-  fadeOut = false,
+  fadeOut = 0,
   children,
 }) => {
   const frame = useCurrentFrame();
-  const opacity = fadeOut
-    ? interpolate(frame, [0, fade, duration - fade, duration], [0, 1, 1, 0], clamp)
-    : interpolate(frame, [0, fade], [0, 1], clamp);
-  return <AbsoluteFill style={{ opacity }}>{children}</AbsoluteFill>;
+  const fadeInOpacity = fade > 0 ? interpolate(frame, [0, fade], [0, 1], clamp) : 1;
+  const fadeOutOpacity = fadeOut > 0 ? interpolate(frame, [duration - fadeOut, duration], [1, 0], clamp) : 1;
+  return <AbsoluteFill style={{ opacity: Math.min(fadeInOpacity, fadeOutOpacity) }}>{children}</AbsoluteFill>;
 };
 
 /** A dark Chrome-like window around a recording. Content area is 16:9. */
@@ -100,9 +99,11 @@ export const BrowserFrame: React.FC<{
   url: string;
   title: string;
   width: number;
+  /** Tab icon in public/ (defaults to the extension icon). */
+  favicon?: string;
   style?: React.CSSProperties;
   children: React.ReactNode;
-}> = ({ url, title, width, style, children }) => {
+}> = ({ url, title, width, favicon = 'icon.png', style, children }) => {
   const barHeight = Math.round(width * 0.034);
   const font = Math.round(barHeight * 0.36);
   const dot = (color: string): React.CSSProperties => ({
@@ -154,17 +155,20 @@ export const BrowserFrame: React.FC<{
             textOverflow: 'ellipsis',
           }}
         >
-          <Img src={staticFile('icon.png')} style={{ width: font * 1.2, height: font * 1.2, flex: 'none' }} />
+          <Img src={staticFile(favicon)} style={{ width: font * 1.2, height: font * 1.2, flex: 'none' }} />
           <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{title}</span>
         </div>
         <div
           style={{
             flex: 1,
+            minWidth: 0,
             padding: `${font * 0.35}px ${font * 0.9}px`,
             borderRadius: font,
             background: '#2b2c2f',
             color: 'rgba(255,255,255,.62)',
             whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
           }}
         >
           🔒 {url}
@@ -175,22 +179,25 @@ export const BrowserFrame: React.FC<{
   );
 };
 
-/** Title + subtitle in a frosted pill, sliding up. */
-export const Caption: React.FC<{ title: string; subtitle?: string; delay?: number; bottom?: number }> = ({
+/** Title + subtitle in a frosted pill, sliding up (and fading out from `exitAt`, if given). */
+export const Caption: React.FC<{ title: string; subtitle?: string; delay?: number; bottom?: number; exitAt?: number }> = ({
   title,
   subtitle,
   delay = 10,
   bottom = 56,
+  exitAt,
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const s = spring({ frame: frame - delay, fps, config: { damping: 200 }, durationInFrames: 24 });
+  const out = exitAt === undefined ? 0 : interpolate(frame, [exitAt, exitAt + 8], [0, 1], clamp);
+  if (s <= 0 || out >= 1) return null;
   return (
     <AbsoluteFill style={{ justifyContent: 'flex-end', alignItems: 'center', paddingBottom: bottom }}>
       <div
         style={{
-          opacity: s,
-          transform: `translateY(${(1 - s) * 40}px)`,
+          opacity: s * (1 - out),
+          transform: `translateY(${(1 - s) * 40 + out * 16}px)`,
           padding: '22px 48px 24px',
           borderRadius: 28,
           background: 'rgba(8,8,14,.58)',
@@ -241,11 +248,13 @@ export const AnimatedWindow: React.FC<{
   top: number;
   url: string;
   title: string;
+  /** Skip the scale-in, e.g. for the opening shot, so the very first frame already shows the page. */
+  instant?: boolean;
   children: React.ReactNode;
-}> = ({ duration, width, top, url, title, children }) => {
+}> = ({ duration, width, top, url, title, instant = false, children }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const enter = spring({ frame, fps, config: { damping: 200 }, durationInFrames: 30 });
+  const enter = instant ? 1 : spring({ frame, fps, config: { damping: 200 }, durationInFrames: 30 });
   const push = interpolate(frame, [0, duration], [1, 1.035], { ...clamp, easing: Easing.inOut(Easing.quad) });
   return (
     <AbsoluteFill style={{ alignItems: 'center' }}>
@@ -280,3 +289,49 @@ export const Pill: React.FC<{ children: React.ReactNode; accent?: boolean; size?
     {children}
   </div>
 );
+
+/** Persistent call to action in the bottom-right corner of the feature scenes. */
+export const StoreHint: React.FC = () => (
+  <div
+    style={{
+      position: 'absolute',
+      right: 44,
+      bottom: 22,
+      zIndex: 10,
+      display: 'flex',
+      alignItems: 'center',
+      gap: 10,
+      padding: '8px 18px',
+      borderRadius: 22,
+      background: 'rgba(8,8,14,.55)',
+      border: '1px solid rgba(255,255,255,.16)',
+      backdropFilter: 'blur(14px)',
+      fontFamily: FONT,
+      fontSize: 22,
+      fontWeight: 600,
+      color: 'rgba(255,255,255,.92)',
+      whiteSpace: 'nowrap',
+    }}
+  >
+    <span
+      style={{
+        padding: '2px 10px',
+        borderRadius: 12,
+        background: `linear-gradient(90deg, ${PINK}, ${BLUE})`,
+        fontSize: 18,
+        fontWeight: 700,
+      }}
+    >
+      免费
+    </span>
+    Chrome 应用商店搜索「B站氛围光」
+  </div>
+);
+
+/** Short white flash that marks a beat-synced hard cut. */
+export const BeatFlash: React.FC<{ at: number; strength?: number }> = ({ at, strength = 0.28 }) => {
+  const frame = useCurrentFrame();
+  const opacity = interpolate(frame, [at, at + 7], [strength, 0], clamp);
+  if (frame < at || frame > at + 7) return null;
+  return <AbsoluteFill style={{ background: '#fff', opacity, mixBlendMode: 'screen', pointerEvents: 'none' }} />;
+};

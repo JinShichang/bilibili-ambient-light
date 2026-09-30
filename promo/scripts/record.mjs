@@ -37,13 +37,26 @@ export const CLIPS = [
   // KDA "MORE": neon colors + black bars baked into the picture (bar detection)
   { id: 'kda', bv: 'BV175411V75Q', start: 133, frames: 150, variants: ['on', 'off'], screen: 'normal' },
   // Sunset time-lapse
-  { id: 'sky', bv: 'BV16K4y1h7eq', start: 20, frames: 150, variants: ['on'], screen: 'normal' },
+  { id: 'sky', bv: 'BV16K4y1h7eq', start: 20, frames: 210, variants: ['on'], screen: 'normal' },
   // 21:9 animation (letterboxed by the player)
-  { id: 'cinema', bv: 'BV19D4y1S75R', start: 280, frames: 150, variants: ['on'], screen: 'normal' },
-  // Sea of clouds, recorded in wide mode
-  { id: 'landscape', bv: 'BV1t94y1C7fp', start: 533, frames: 150, variants: ['on'], screen: 'wide' },
+  { id: 'cinema', bv: 'BV19D4y1S75R', start: 280, frames: 210, variants: ['on'], screen: 'normal' },
+  // Aso volcano drone shot, recorded in wide mode. One continuous shot (hard cuts at 818.33 s and
+  // 821.93 s) with no burned-in subtitles, which most of this video has.
+  { id: 'landscape', bv: 'BV1t94y1C7fp', start: 818.36, frames: 106, variants: ['on'], screen: 'wide' },
   // Jinx CG
-  { id: 'jinx', bv: 'BV1kp4y1k7ax', start: 120, frames: 120, variants: ['on'], screen: 'normal' },
+  { id: 'jinx', bv: 'BV1kp4y1k7ax', start: 120, frames: 195, variants: ['on'], screen: 'normal' },
+  // 鸣潮 × 赛博朋克：边缘行者 collab trailer (official 鸣潮 channel)
+  { id: 'wuwa', bv: 'BV1tbRhBKEWb', start: 43.2, frames: 90, variants: ['on'], screen: 'normal' },
+  // 鸣潮 公测PV (official): glowing chessboard shot
+  { id: 'wuwa2', bv: 'BV1gf421d7iS', start: 71.0, frames: 48, variants: ['on'], screen: 'normal' },
+  // 明日方舟：终末地 公测PV (official)
+  { id: 'endfield', bv: 'BV1XTkNB3Er9', start: 215.95, frames: 72, variants: ['on'], screen: 'normal' },
+  // FX战士久留美 正式PV (Oct 2026 anime, subtitled PV)
+  { id: 'kurumi', bv: 'BV17Et86SETm', start: 66, frames: 105, variants: ['on'], screen: 'normal' },
+  // 【4K60FPS】英雄联盟《Legends Never Die》(6.5M views)
+  { id: 'lnd', bv: 'BV1XR4y1E7cm', start: 95.1, frames: 90, variants: ['on'], screen: 'normal' },
+  // 4K 冰岛之旅 (2.1M views): aurora
+  { id: 'iceland', bv: 'BV1iT4y1F7at', start: 300, frames: 150, variants: ['on'], screen: 'normal' },
 ];
 
 // ---------------------------------------------------------------- WebBridge
@@ -76,6 +89,58 @@ async function capture(session, path, params = {}) {
 }
 
 // ---------------------------------------------------------------- page functions (run in the tab)
+
+/**
+ * Hides what doesn't belong in public footage: overlays of other extensions (they attach
+ * directly to <html>, e.g. WebBridge, Immersive Translate), the scrollbar, the logged-in user's
+ * avatar and notification counts, and ads.
+ */
+function pageClean() {
+  let style = document.getElementById('bal-store-style');
+  if (!style) {
+    style = document.createElement('style');
+    style.id = 'bal-store-style';
+    document.head.append(style);
+  }
+  // Always rewritten, so a copy left over from an older run can't win.
+  style.textContent = `
+    html > div, #bewly, #bilibiliHelper2HandleButtonWrapper { display: none !important; }
+    html { scrollbar-width: none !important; }
+    .header-avatar-wrap, .header-avatar-wrap--container { visibility: hidden !important; }
+    .red-num, .red-point, .right-entry .num { display: none !important; }
+    #slide_ad, .ad-report, .video-card-ad-small, .ad-floor-exp, .right-bottom-banner,
+    .strip-ad, .activity-m-v1, .video-page-game-card-small { display: none !important; }
+    .bpx-player-subtitle-wrap { opacity: 0 !important; }
+  `;
+  // Ad cards change class names often; they all carry a "广告" badge, so hide by that.
+  for (const leaf of document.querySelectorAll('.left-container *, .right-container *')) {
+    if (leaf.childElementCount || leaf.textContent.trim() !== '广告') continue;
+    const card = leaf.closest('.video-page-card-small, .video-card-ad-small, .ad-report, [class*="card"]');
+    card?.style.setProperty('display', 'none', 'important');
+  }
+  // The WebBridge overlay forces itself visible with an inline !important and lives in a shadow
+  // root, so page CSS can't reach it. Hide its content from inside instead.
+  const overlay = document.getElementById('kimi-webbridge-agent-visuals')?.shadowRoot;
+  if (overlay && !overlay.getElementById('bal-store-hide')) {
+    const hide = document.createElement('style');
+    hide.id = 'bal-store-hide';
+    hide.textContent = '* { display: none !important; }';
+    overlay.append(hide);
+  }
+  const bewly = document.getElementById('bewly');
+  return JSON.stringify({
+    ok: true,
+    styleConnected: Boolean(document.getElementById('bal-store-style')?.isConnected),
+    overlay: Boolean(overlay),
+    bewlyDisplay: bewly ? getComputedStyle(bewly).display : 'absent',
+  });
+}
+
+function pageUnclean() {
+  document.getElementById('bal-store-style')?.remove();
+  document.getElementById('kimi-webbridge-agent-visuals')?.shadowRoot?.getElementById('bal-store-hide')?.remove();
+  return JSON.stringify({ ok: true });
+}
 
 async function pageSetup({ devBase, screen }) {
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -284,10 +349,10 @@ async function pagePreview({ times }) {
       const y = Math.floor(i / cols) * h;
       ctx.drawImage(video, x, y, w, h);
       ctx.fillStyle = 'rgba(0,0,0,.6)';
-      ctx.fillRect(x, y, 70, 26);
+      ctx.fillRect(x, y, 84, 26);
       ctx.fillStyle = '#fff';
       ctx.font = 'bold 18px sans-serif';
-      ctx.fillText(`${Math.round(times[i])}s`, x + 6, y + 19);
+      ctx.fillText(`${times[i].toFixed(1)}s`, x + 6, y + 19);
     }
     return JSON.stringify({ image: canvas.toDataURL('image/jpeg', 0.8) });
   } catch (err) {
@@ -384,16 +449,27 @@ async function openClip(session, clip) {
   return info;
 }
 
-async function preview(session, clips) {
+/** fine = true: 12 frames spread over the clip's recording window instead of the whole video. */
+async function preview(session, clips, fine = false) {
   const dir = join(REC_DIR, 'preview');
   await mkdir(dir, { recursive: true });
   for (const clip of clips) {
     const info = await openClip(session, clip);
-    const times = Array.from({ length: 12 }, (_, i) => (info.duration * (i + 1)) / 13);
+    const span = clip.frames / FPS;
+    const times = fine
+      ? Array.from({ length: 12 }, (_, i) => clip.start + (span * i) / 11)
+      : Array.from({ length: 12 }, (_, i) => (info.duration * (i + 1)) / 13);
     const { image } = await evaluate(session, pagePreview, { times });
     const file = join(dir, `${clip.id}.jpg`);
     await writeFile(file, Buffer.from(image.split(',')[1], 'base64'));
     console.log(`[${clip.id}] preview -> ${file}`);
+  }
+}
+
+async function ensureClean(session) {
+  const state = await evaluate(session, pageClean);
+  if (!state.styleConnected || !['none', 'absent'].includes(state.bewlyDisplay)) {
+    throw new Error(`cleanup style not active: ${JSON.stringify(state)}`);
   }
 }
 
@@ -407,6 +483,8 @@ async function record(session, clips) {
       await evaluate(session, pageSetEnabled, variant !== 'off');
       const started = performance.now();
       for (let i = 0; i < clip.frames; i++) {
+        // Lazy-loaded ads and re-rendered overlays: re-apply the cleanup regularly.
+        if (i % 10 === 0) await ensureClean(session);
         // Middle of the frame interval avoids landing exactly on a frame boundary.
         const t = clip.start + (i + 0.5) / FPS;
         const step = await evaluate(session, pageStep, { t, warmup: i === 0 });
@@ -444,6 +522,7 @@ async function popupShot(session) {
 async function restore(session) {
   try {
     await evaluate(session, pageTeardown);
+    await evaluate(session, pageUnclean);
     await cdp(session, 'Emulation.clearDeviceMetricsOverride');
     await cdp(session, 'Emulation.setFocusEmulationEnabled', { enabled: false });
   } catch (err) {
@@ -456,10 +535,12 @@ async function main() {
   // --session a,b: several WebBridge sessions (one tab each) record different clips in parallel.
   let sessions = ['bili-promo-a'];
   let frames = 0; // --frames N: override the frame count (quick tests)
+  let fineIds = false; // --fine: preview only the recording window of each clip
   const ids = [];
   for (let i = 0; i < rest.length; i++) {
     if (rest[i] === '--session') sessions = rest[++i].split(',').filter(Boolean);
     else if (rest[i] === '--frames') frames = Number(rest[++i]);
+    else if (rest[i] === '--fine') fineIds = true;
     else ids.push(rest[i]);
   }
   const clips = (ids.length ? CLIPS.filter((c) => ids.includes(c.id)) : CLIPS).map((c) =>
@@ -477,7 +558,7 @@ async function main() {
 
   const server = await startDevServer();
   try {
-    if (command === 'preview') await preview(sessions[0], clips);
+    if (command === 'preview') await preview(sessions[0], clips, fineIds);
     else if (command === 'record') await Promise.all(queues.map((q) => record(q.session, q.clips)));
     else if (command === 'popup') await popupShot(sessions[0]);
     else throw new Error(`unknown command ${command}`);
@@ -487,7 +568,7 @@ async function main() {
   }
 }
 
-export { wb, cdp, evaluate, openClip, pageSetEnabled, pageStep, pageTeardown, startDevServer };
+export { wb, cdp, evaluate, openClip, pageClean, pageUnclean, pageSetEnabled, pageStep, pageTeardown, startDevServer };
 
 // Run only when executed directly (the helpers above can be imported for debugging).
 if (resolve(process.argv[1] ?? '') === fileURLToPath(import.meta.url)) {
