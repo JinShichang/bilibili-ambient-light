@@ -1,0 +1,3 @@
+# Shows the "Sponsor" button on the repository page (turn on Settings > General > Features > Sponsorships).
+# It links to the "支持作者" section of the README, which has the WeChat and Alipay codes.
+custom: ["https://github.com/Miruko2/bilibili-ambient-light#%E6%94%AF%E6%8C%81%E4%BD%9C%E8%80%85"]

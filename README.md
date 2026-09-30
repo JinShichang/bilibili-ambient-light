@@ -51,11 +51,12 @@ Edge 用户也可以从上面的链接安装：页面上方出现提示时，选
 | `src/content.js` | B 站页面集成：查找播放器、切换页面状态 |
 | `src/content.css` | 透明页面、深色配色与文字阴影 |
 | `popup/` | 工具栏弹窗（设置面板） |
-| `icons/`、`assets/` | 图标与去色带噪点贴图 |
+| `icons/`、`assets/` | 图标、去色带噪点贴图和弹窗里的收款码 |
 | `tools/generate-assets.mjs` | 生成图标、噪点贴图和商店图标 |
 | `tools/pack.ps1` | 打包上架用的 zip 到 `dist/` |
 | `store/` | 商店截图、宣传图和上架清单 |
 | `promo/` | 用 Remotion 制作宣传视频和商店截图的工程 |
+| `.github/` | 仓库页赞助（Sponsor）按钮的配置和收款码原图 |
 
 ## 开发
 
@@ -80,6 +81,18 @@ npm run store:stills   # 合成对比图和宣传图块
 ```
 
 录制的视频素材和配乐受版权保护，所以没有放进仓库。
+
+## 支持作者
+
+B站氛围光的全部功能都免费。如果它让你看视频更舒服，欢迎请作者喝杯咖啡，金额随意。扩展弹窗底部的「☕ 请作者喝杯咖啡」里也有这两个码。
+
+<p align="center">
+  <img src=".github/donate/wechat.jpg" alt="微信收款码" width="309">
+  &nbsp;&nbsp;
+  <img src=".github/donate/alipay.jpg" alt="支付宝收款码" width="280">
+</p>
+
+也欢迎去 [Chrome 应用商店](https://chromewebstore.google.com/detail/jeooggamefikdijnbfbabphhffbmmjkn/reviews) 留个评分，或者给仓库点个 Star。
 
 ## 声明
 

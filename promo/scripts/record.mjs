@@ -378,7 +378,8 @@ async function pagePopup({ devBase }) {
     const style = doc.createElement('style');
     style.textContent = `${css}\n#controls{max-height:none!important;overflow:visible!important}`;
     doc.head.append(style);
-    doc.body.innerHTML = html.match(/<body>([\s\S]*?)<script/)[1].replace('../icons/', devBase + 'icons/');
+    // Relative paths (icons, bundled donation codes) point at the dev server instead.
+    doc.body.innerHTML = html.match(/<body>([\s\S]*?)<script/)[1].replaceAll('../', devBase);
     frame.contentWindow.eval(settingsJs);
     frame.contentWindow.eval(popupJs);
     await new Promise((r) => setTimeout(r, 600));

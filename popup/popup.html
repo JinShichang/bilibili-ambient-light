@@ -29,6 +29,43 @@
       <p class="hint">调整会实时应用到已打开的 B 站视频页</p>
     </footer>
 
+    <div class="support">
+      <button type="button" class="link" id="donate-open" aria-haspopup="dialog">
+        <span aria-hidden="true">☕</span> 请作者喝杯咖啡
+      </button>
+      <a
+        class="link"
+        href="https://chromewebstore.google.com/detail/jeooggamefikdijnbfbabphhffbmmjkn/reviews"
+        target="_blank"
+        rel="noopener noreferrer"
+        ><span aria-hidden="true">⭐</span> 去商店评分</a
+      >
+    </div>
+
+    <!-- The payment codes are bundled with the extension; nothing is loaded from the network. -->
+    <dialog id="donate" aria-labelledby="donate-title">
+      <div class="donate-head">
+        <h2 id="donate-title">请作者喝杯咖啡</h2>
+        <button type="button" class="donate-close" id="donate-close" aria-label="关闭">×</button>
+      </div>
+      <p class="donate-lead">全部功能都免费。觉得好用的话，用微信或支付宝扫一扫就能打赏，金额随意，谢谢你的支持。</p>
+      <!-- One code at a time: big enough to scan, and the camera never sees two codes at once. -->
+      <div class="donate-switch" role="radiogroup" aria-label="付款方式">
+        <label>
+          <input type="radio" name="donate-app" value="wechat" checked />
+          <span class="dot dot-wechat" aria-hidden="true"></span>微信
+        </label>
+        <label>
+          <input type="radio" name="donate-app" value="alipay" />
+          <span class="dot dot-alipay" aria-hidden="true"></span>支付宝
+        </label>
+      </div>
+      <figure class="donate-code">
+        <img id="donate-img" src="../assets/donate/wechat.png" alt="微信收款码" width="200" height="200" />
+        <figcaption id="donate-hint">打开微信，扫一扫</figcaption>
+      </figure>
+    </dialog>
+
     <script src="../src/settings.js"></script>
     <script src="popup.js"></script>
   </body>

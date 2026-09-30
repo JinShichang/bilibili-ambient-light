@@ -165,6 +165,36 @@
     });
   }
 
+  // "请作者喝杯咖啡": shows the bundled payment codes in a modal dialog, only when asked.
+  const DONATE_APPS = {
+    wechat: { alt: '微信收款码', hint: '打开微信，扫一扫' },
+    alipay: { alt: '支付宝收款码', hint: '打开支付宝，扫一扫' },
+  };
+
+  function initSupport() {
+    const dialog = document.getElementById('donate');
+    const img = document.getElementById('donate-img');
+    const hint = document.getElementById('donate-hint');
+    document.getElementById('donate-open').addEventListener('click', () => dialog.showModal());
+    document.getElementById('donate-close').addEventListener('click', () => dialog.close());
+    for (const radio of dialog.querySelectorAll('input[name="donate-app"]')) {
+      radio.addEventListener('change', () => {
+        const app = DONATE_APPS[radio.value];
+        img.src = new URL(`${radio.value}.png`, img.src).href; // sibling file in assets/donate/
+        img.alt = app.alt;
+        hint.textContent = app.hint;
+      });
+    }
+    // Clicks on the backdrop are dispatched to the <dialog> itself, outside its box. (Esc closes natively.)
+    dialog.addEventListener('click', (event) => {
+      if (event.target !== dialog) return;
+      const r = dialog.getBoundingClientRect();
+      const inside =
+        event.clientX >= r.left && event.clientX <= r.right && event.clientY >= r.top && event.clientY <= r.bottom;
+      if (!inside) dialog.close();
+    });
+  }
+
   function syncInputs() {
     for (const [key, { input, output, format }] of inputs) {
       const value = settings[key];
@@ -182,6 +212,7 @@
   }
 
   render();
+  initSupport();
   load().then((loaded) => {
     settings = loaded;
     syncInputs();

@@ -228,3 +228,168 @@ body.is-disabled #controls,
 body.is-disabled .presets {
   opacity: 0.45;
 }
+
+/* Support links under the footer */
+.support {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.link {
+  flex: none;
+  padding: 2px 0;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 12px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.link:hover {
+  color: var(--text);
+}
+
+.link:focus-visible {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 2px;
+}
+
+/* "请作者喝杯咖啡" dialog: fits inside the popup (Chrome caps popups at 600px height) */
+#donate {
+  width: 304px;
+  max-width: calc(100vw - 16px);
+  max-height: calc(100vh - 16px);
+  padding: 12px 14px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  color: var(--text);
+  box-shadow: 0 16px 48px rgb(0 0 0 / 60%);
+}
+
+#donate::backdrop {
+  background: rgb(0 0 0 / 60%);
+}
+
+.donate-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.donate-head h2 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.donate-close {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border-color: transparent;
+  background: none;
+  color: var(--muted);
+  font-size: 18px;
+  line-height: 1;
+}
+
+.donate-close:hover {
+  color: var(--text);
+}
+
+.donate-lead {
+  margin: 0 0 12px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* 微信 / 支付宝 segmented switch (native radios: arrow keys work out of the box) */
+.donate-switch {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+}
+
+.donate-switch label {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 4px 0;
+  border-radius: 6px;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+/* The radio covers its label: invisible, but still focusable and clickable */
+.donate-switch input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.donate-switch label:has(input:checked) {
+  background: rgb(255 255 255 / 10%);
+  color: var(--text);
+}
+
+.donate-switch label:has(input:focus-visible) {
+  outline: 2px solid var(--accent-2);
+  outline-offset: 1px;
+}
+
+.donate-code {
+  margin: 0;
+  text-align: center;
+}
+
+/* 200px: the codes decode reliably from 150px up at every screen density. White tile = quiet zone. */
+.donate-code img {
+  display: block;
+  width: 200px;
+  height: 200px;
+  margin: 0 auto;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.donate-code figcaption {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.dot-wechat {
+  background: #07c160;
+}
+
+.dot-alipay {
+  background: #1677ff;
+}
