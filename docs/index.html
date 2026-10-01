@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>B站氛围光 - B站毛玻璃氛围光插件（Chrome / Edge 扩展）</title>
+<meta name="description" content="免费开源的浏览器扩展：在 B 站（哔哩哔哩）看视频时，把画面的颜色实时延伸到整个网页背景，效果类似 YouTube 的毛玻璃氛围光。自动识别黑边，参数可调，所有处理都在本地完成。">
+<link rel="canonical" href="https://miruko2.github.io/bilibili-ambient-light/">
+<!-- Google Search Console 验证：把 Search Console 给的那一行 <meta name="google-site-verification" content="…"> 粘贴在这条注释下面 -->
+<meta name="theme-color" content="#0b0b10">
+<meta name="color-scheme" content="dark">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="B站氛围光">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:url" content="https://miruko2.github.io/bilibili-ambient-light/">
+<meta property="og:title" content="B站氛围光：B 站的毛玻璃氛围光扩展">
+<meta property="og:description" content="把 B 站视频的颜色实时铺满整个网页。免费、开源，支持 Chrome 和 Edge。">
+<meta property="og:image" content="https://miruko2.github.io/bilibili-ambient-light/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="B站氛围光：同一个 B 站视频页开启和关闭的对比">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "B站氛围光 · Ambient Light for Bilibili",
+  "alternateName": ["B站氛围光", "Ambient Light for Bilibili"],
+  "description": "在 B 站看视频时，把画面的色彩实时延伸到整个网页背景的浏览器扩展，效果类似 YouTube 的毛玻璃氛围光。",
+  "url": "https://miruko2.github.io/bilibili-ambient-light/",
+  "applicationCategory": "BrowserApplication",
+  "operatingSystem": "Google Chrome 116+, Microsoft Edge",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "CNY" },
+  "isAccessibleForFree": true,
+  "inLanguage": "zh-CN",
+  "image": "https://miruko2.github.io/bilibili-ambient-light/og.jpg",
+  "screenshot": [
+    "https://miruko2.github.io/bilibili-ambient-light/img/compare.webp",
+    "https://miruko2.github.io/bilibili-ambient-light/img/sky.webp",
+    "https://miruko2.github.io/bilibili-ambient-light/img/cinema.webp",
+    "https://miruko2.github.io/bilibili-ambient-light/img/wide.webp",
+    "https://miruko2.github.io/bilibili-ambient-light/img/settings.webp"
+  ],
+  "installUrl": "https://chromewebstore.google.com/detail/jeooggamefikdijnbfbabphhffbmmjkn",
+  "downloadUrl": "https://chromewebstore.google.com/detail/jeooggamefikdijnbfbabphhffbmmjkn",
+  "license": "https://opensource.org/licenses/MIT",
+  "author": { "@type": "Person", "name": "Miruko2", "url": "https://github.com/Miruko2" },
+  "sameAs": [
+    "https://github.com/Miruko2/bilibili-ambient-light",
+    "https://chromewebstore.google.com/detail/jeooggamefikdijnbfbabphhffbmmjkn"
+  ]
+}
+</script>
+<style>
+  :root {
+    --bg: #0b0b10; --fg: #ececf2; --muted: #a9a9b9; --line: rgba(255, 255, 255, .10); --card: rgba(255, 255, 255, .04);
+    --pink: #fb7299; --blue: #00aeec; --link: #7fd4ff;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; color: var(--fg); background: var(--bg); line-height: 1.75; font-size: 16px;
+    font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans SC", "Source Han Sans SC", system-ui, -apple-system, "Segoe UI", sans-serif;
+    background-image: radial-gradient(60rem 32rem at 18% -6rem, rgba(251, 114, 153, .16), transparent 70%),
+                      radial-gradient(60rem 32rem at 82% -6rem, rgba(0, 174, 236, .14), transparent 70%);
+    background-repeat: no-repeat;
+  }
+  a { color: var(--link); text-underline-offset: 3px; }
+  a:hover { text-decoration-thickness: 2px; }
+  :focus-visible { outline: 3px solid #fff; outline-offset: 3px; border-radius: 6px; }
+  img { display: block; max-width: 100%; height: auto; }
+  code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: .92em; padding: .1em .4em; border-radius: 6px; background: rgba(255, 255, 255, .08); }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+  .skip { position: absolute; left: 16px; top: -64px; z-index: 10; padding: 8px 14px; border-radius: 8px; background: #fff; color: #111; font-weight: 700; }
+  .skip:focus { top: 12px; }
+
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 0; }
+  .brand { display: flex; align-items: center; gap: 10px; color: var(--fg); text-decoration: none; font-weight: 700; font-size: 17px; }
+  .brand img { width: 28px; height: 28px; }
+  .top nav ul { display: flex; flex-wrap: wrap; gap: 4px 20px; margin: 0; padding: 0; list-style: none; font-size: 15px; }
+  .top nav a { color: var(--muted); text-decoration: none; }
+  .top nav a:hover { color: var(--fg); }
+
+  .hero { padding: 56px 0 24px; text-align: center; }
+  .eyebrow { margin: 0 0 14px; color: var(--muted); font-size: 15px; letter-spacing: .04em; }
+  h1 { margin: 0 auto; max-width: 15em; font-size: clamp(34px, 5.4vw, 60px); line-height: 1.22; font-weight: 800; letter-spacing: .01em; }
+  .lede { margin: 22px auto 0; max-width: 40em; color: #d4d4de; font-size: 17px; }
+  .cta { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 30px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 22px; border-radius: 999px; font-weight: 700; text-decoration: none; }
+  .btn-main { color: #121218; background: linear-gradient(90deg, var(--pink), var(--blue)); }
+  .btn-main:hover { filter: brightness(1.08); }
+  .btn-ghost { color: var(--fg); border: 1px solid rgba(255, 255, 255, .24); }
+  .btn-ghost:hover { background: rgba(255, 255, 255, .06); }
+  .hint { margin: 14px 0 0; color: var(--muted); font-size: 14px; }
+
+  .shot { position: relative; isolation: isolate; margin: 52px auto 0; max-width: 1040px; }
+  .shot img { border-radius: 14px; box-shadow: 0 0 0 1px rgba(255, 255, 255, .12), 0 30px 80px rgba(0, 0, 0, .5); }
+  .shot.glow::before {   /* the page's own ambient light: a blurred copy of the picture spilling out behind it */
+    content: ""; position: absolute; inset: 0; z-index: -1; border-radius: 40px;
+    background: var(--src) center / cover; filter: blur(60px) saturate(1.5); opacity: .9;
+  }
+  figcaption { margin-top: 12px; color: var(--muted); font-size: 14px; text-align: center; }
+
+  section { padding: 56px 0 8px; }
+  h2 { margin: 0 0 8px; font-size: clamp(24px, 3vw, 30px); line-height: 1.35; }
+  .section-lede { margin: 0 0 28px; color: var(--muted); }
+  h3 { margin: 0 0 6px; font-size: 17px; }
+  .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); margin: 0; padding: 0; list-style: none; }
+  .card { padding: 20px 22px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); }
+  .card p { margin: 0; color: #c6c6d2; font-size: 15px; }
+  .gallery { display: grid; gap: 28px 24px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .gallery figure { margin: 0; }
+  .gallery img { border-radius: 12px; box-shadow: 0 0 0 1px rgba(255, 255, 255, .10); }
+  .gallery figcaption { text-align: left; }
+
+  .steps { margin: 0; padding: 0; list-style: none; counter-reset: step; display: grid; gap: 12px; }
+  .steps li { position: relative; padding: 14px 18px 14px 58px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); }
+  .steps li::before {
+    counter-increment: step; content: counter(step); position: absolute; left: 16px; top: 13px; width: 28px; height: 28px; border-radius: 50%;
+    display: grid; place-items: center; font-weight: 700; font-size: 14px; color: #121218; background: linear-gradient(135deg, var(--pink), var(--blue));
+  }
+  .note { color: var(--muted); font-size: 15px; }
+  .install .card ol { margin: 8px 0 0; padding-left: 1.3em; color: #c6c6d2; font-size: 15px; }
+  .install .card .btn { margin-top: 14px; min-height: 44px; font-size: 15px; }
+
+  .faq details { border: 1px solid var(--line); border-radius: 12px; background: var(--card); margin-bottom: 10px; }
+  .faq summary { cursor: pointer; padding: 14px 18px; font-weight: 700; list-style-position: inside; }
+  .faq details p { margin: 0; padding: 0 18px 16px; color: #c6c6d2; font-size: 15px; }
+
+  footer { margin-top: 64px; padding: 28px 0 40px; border-top: 1px solid var(--line); color: var(--muted); font-size: 14px; }
+  footer p { margin: 6px 0; }
+  footer a { color: var(--muted); }
+  footer a:hover { color: var(--fg); }
+
+  @media (max-width: 640px) {
+    .top { flex-direction: column; align-items: flex-start; }
+    .hero { padding-top: 28px; }
+    .lede { font-size: 16px; }
+    .shot { margin-top: 36px; }
+    .gallery { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .btn, .top nav a { transition: background-color .2s, filter .2s, color .2s; }
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">跳到正文</a>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="./"><img src="favicon.png" width="28" height="28" alt="">B站氛围光</a>
+    <nav aria-label="页面导航">
+      <ul>
+        <li><a href="#features">功能</a></li>
+        <li><a href="#install">安装</a></li>
+        <li><a href="#faq">常见问题</a></li>
+        <li><a href="https://github.com/Miruko2/bilibili-ambient-light">GitHub</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero" aria-labelledby="title">
+      <p class="eyebrow">Chrome / Edge 扩展 · 免费开源</p>
+      <h1 id="title">把 B 站视频的颜色，<br>铺满整个网页</h1>
+      <p class="lede">B站氛围光会逐帧读取正在播放的画面，把边缘的色彩柔和地扩散到网页背景：画面是什么颜色，页面就亮起什么颜色。效果和 YouTube 上流行的 Ambient light 扩展（国内常被叫作“毛玻璃”）类似，现在 B 站也能用。</p>
+      <div class="cta">
+        <a class="btn btn-main" href="https://chromewebstore.google.com/detail/jeooggamefikdijnbfbabphhffbmmjkn">从 Chrome 应用商店安装</a>
+        <a class="btn btn-ghost" href="https://github.com/Miruko2/bilibili-ambient-light">在 GitHub 查看源码</a>
+      </div>
+      <p class="hint">Edge 也从 Chrome 应用商店安装。打不开商店的话，可以<a href="#manual">手动安装</a>。</p>
+      <figure class="shot glow" style="--src: url('img/compare.webp')">
+        <img src="img/compare.webp" width="1280" height="800" fetchpriority="high"
+             alt="同一个 B 站视频页的对比：左半边开启氛围光，网页背景被画面染成粉红色；右半边关闭，背景是普通的深色">
+        <figcaption>左半边开启，右半边关闭。</figcaption>
+      </figure>
+    </section>
+
+    <!-- 宣传片上传 B 站后，把 BV 号换成真实的，再去掉这段注释的首尾两行：
+    <section aria-labelledby="video-title">
+      <h2 id="video-title">34 秒看完</h2>
+      <div style="position: relative; aspect-ratio: 16 / 9; margin-top: 20px;">
+        <iframe src="https://player.bilibili.com/player.html?bvid=BV号&autoplay=0" title="B站氛围光宣传片" loading="lazy"
+                style="position: absolute; inset: 0; width: 100%; height: 100%; border: 0; border-radius: 14px;" allowfullscreen></iframe>
+      </div>
+    </section>
+    -->
+
+    <section id="features" aria-labelledby="features-title">
+      <h2 id="features-title">功能</h2>
+      <p class="section-lede">装好就能用，默认就是“满屏”效果。</p>
+      <ul class="grid">
+        <li class="card"><h3>氛围光</h3><p>逐帧读取视频画面，把边缘色彩柔和地扩散到页面背景，并自然渐隐。</p></li>
+        <li class="card"><h3>自动识别黑边</h3><p>视频自带的黑边会被跳过，光从画面真正的边缘出发。21:9 电影、带黑边的 PV 也一样。</p></li>
+        <li class="card"><h3>通透页面</h3><p>页面切换为半透明深色主题，并加上文字阴影，内容依旧清晰。</p></li>
+        <li class="card"><h3>跟随播放模式</h3><p>普通和宽屏模式下生效；网页全屏、全屏和小窗播放时自动隐藏，不影响观看。</p></li>
+        <li class="card"><h3>预设和参数</h3><p>柔和、沉浸、满屏三个预设一键切换。光晕范围、模糊、亮度、饱和度、对比度、渐隐、帧率上限也能单独调，实时生效。</p></li>
+        <li class="card"><h3>只在本地运行</h3><p>画面只在内存里处理，不收集、不上传、不分享任何数据，只在本地保存你的设置。</p></li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="gallery-title">
+      <h2 id="gallery-title">效果</h2>
+      <p class="section-lede">光的颜色和亮度跟着画面实时变化。</p>
+      <div class="gallery">
+        <figure>
+          <img src="img/sky.webp" width="1280" height="800" loading="lazy" decoding="async" alt="B 站视频页播放天空延时摄影，整个网页背景被染成淡紫色和粉色">
+          <figcaption>延时摄影：整个页面跟着天空变色。</figcaption>
+        </figure>
+        <figure>
+          <img src="img/cinema.webp" width="1280" height="800" loading="lazy" decoding="async" alt="播放 21:9 动画短片，画面自带的黑边被跳过，金色的光从画面边缘延伸到页面">
+          <figcaption>21:9 动画短片：跳过画面里的黑边，光从画面的真实边缘亮起。</figcaption>
+        </figure>
+        <figure>
+          <img src="img/wide.webp" width="1280" height="800" loading="lazy" decoding="async" alt="宽屏模式下播放云海风景，网页背景是蓝色的光">
+          <figcaption>宽屏模式同样生效。</figcaption>
+        </figure>
+        <figure>
+          <img src="img/settings.webp" width="1280" height="800" loading="lazy" decoding="async" alt="扩展的设置弹窗：三个预设按钮，以及光晕范围、模糊程度、亮度、饱和度、对比度、渐隐起点等滑块">
+          <figcaption>点工具栏上的扩展图标打开设置，拖动滑块实时生效。</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="install" class="install" aria-labelledby="install-title">
+      <h2 id="install-title">安装</h2>
+      <p class="section-lede">装好后打开任意 B 站视频页就能看到效果。点工具栏上的扩展图标，可以开关氛围光、切换预设和调整参数。</p>
+      <div class="grid">
+        <div class="card">
+          <h3>Chrome</h3>
+          <p>打开 Chrome 应用商店的页面，点「添加至 Chrome」。需要 Chrome 116 或更新的版本。</p>
+          <a class="btn btn-main" href="https://chromewebstore.google.com/detail/jeooggamefikdijnbfbabphhffbmmjkn">打开商店页面</a>
+        </div>
+        <div class="card">
+          <h3>Edge</h3>
+          <p>打开同一个商店页面。页面上方出现提示时，选择「允许来自其他应用商店的扩展」，再点「添加至 Chrome」。</p>
+          <a class="btn btn-ghost" href="https://chromewebstore.google.com/detail/jeooggamefikdijnbfbabphhffbmmjkn">打开商店页面</a>
+        </div>
+        <div class="card" id="manual">
+          <h3>手动安装</h3>
+          <p>打不开 Chrome 应用商店时：</p>
+          <ol>
+            <li>在 <a href="https://github.com/Miruko2/bilibili-ambient-light">GitHub 项目页</a>点 Code → Download ZIP，下载后解压。</li>
+            <li>地址栏打开 <code>chrome://extensions</code>（Edge 是 <code>edge://extensions</code>），打开「开发者模式」。</li>
+            <li>点「加载已解压的扩展程序」，选择解压出来、里面有 manifest.json 的文件夹。</li>
+          </ol>
+          <p class="note">手动安装的版本不会自动更新，有新版本时需要重新下载。</p>
+        </div>
+      </div>
+    </section>
+
+    <section aria-labelledby="how-title">
+      <h2 id="how-title">工作原理</h2>
+      <p class="section-lede">不需要灯带之类的硬件，全部在浏览器里完成。</p>
+      <ol class="steps">
+        <li>把当前视频帧缩小，画到一块小画布上。</li>
+        <li>以视频为中心，把这一帧按越来越大的尺寸叠画多次，让边缘的颜色一圈圈向外延伸。</li>
+        <li>用渐变遮罩让光向页面边缘渐隐，再做模糊和调色，画到固定在页面最底层的画布上。</li>
+        <li>用 <code>requestVideoFrameCallback</code> 跟随视频帧重绘，暂停或页面不可见时停止绘制。</li>
+      </ol>
+      <p class="note">整个渲染只用低分辨率画布，实测每帧主线程开销约 1–2 毫秒。思路参考了 <a href="https://github.com/WesselKroos/youtube-ambilight">Ambient light for YouTube</a>（MIT 协议），代码针对 B 站独立重写，<a href="https://github.com/Miruko2/bilibili-ambient-light">源码在 GitHub 上</a>。</p>
+    </section>
+
+    <section id="faq" class="faq" aria-labelledby="faq-title">
+      <h2 id="faq-title">常见问题</h2>
+      <details>
+        <summary>会不会卡，费不费电？</summary>
+        <p>光效只在低分辨率的画布上计算，结果本来就要模糊，看不出分辨率的差别。实测每帧主线程开销约 1–2 毫秒。暂停或切到别的标签页时停止绘制。设置里还可以限制帧率、降低光效的分辨率。</p>
+      </details>
+      <details>
+        <summary>支持哪些浏览器？</summary>
+        <p>Chrome 116 及以上和 Microsoft Edge。其他能从 Chrome 应用商店安装扩展的 Chromium 内核浏览器通常也能用，但没有逐一测试。</p>
+      </details>
+      <details>
+        <summary>为什么全屏、网页全屏和小窗播放时没有光？</summary>
+        <p>这几种模式下，视频要么盖住了整个页面，要么悬浮在角落，背后没有可以照亮的网页，所以自动隐藏。切回普通或宽屏模式就会恢复。</p>
+      </details>
+      <details>
+        <summary>直播间能用吗？</summary>
+        <p>目前只在 www.bilibili.com 的视频页运行，直播间（live.bilibili.com）不支持。</p>
+      </details>
+      <details>
+        <summary>会收集我的数据吗？</summary>
+        <p>不会。所有处理都在浏览器本地完成，读取的画面只在内存中处理，不保存，也不发送到任何地方。扩展只在本地保存你的设置。详见<a href="https://github.com/Miruko2/bilibili-ambient-light/blob/main/PRIVACY.md">隐私政策</a>。</p>
+      </details>
+      <details>
+        <summary>和 YouTube 的“毛玻璃”扩展是什么关系？</summary>
+        <p>YouTube 上的 Ambient light 扩展会把画面的颜色延伸到页面背景，国内常被叫作“毛玻璃”。B站氛围光参考了它的思路（MIT 协议），代码针对 B 站的播放器和页面结构独立重写，两者没有关联。</p>
+      </details>
+    </section>
+  </main>
+
+  <footer>
+    <p>B站氛围光 · Ambient Light for Bilibili · MIT 协议开源</p>
+    <p><a href="https://github.com/Miruko2/bilibili-ambient-light">GitHub</a> · <a href="https://github.com/Miruko2/bilibili-ambient-light/blob/main/PRIVACY.md">隐私政策</a> · <a href="https://github.com/Miruko2/bilibili-ambient-light/issues">问题反馈</a> · <a href="https://chromewebstore.google.com/detail/jeooggamefikdijnbfbabphhffbmmjkn">Chrome 应用商店</a></p>
+    <p>本扩展为个人开发的非官方工具，与哔哩哔哩（bilibili）没有任何关联。</p>
+    <p lang="en">Ambient Light for Bilibili is a free, open-source Chrome / Edge extension that extends the colors of Bilibili videos across the whole page.</p>
+  </footer>
+</div>
+</body>
+</html>

@@ -57,8 +57,8 @@
 
 | 字段 | 填写 |
 | --- | --- |
-| 官方网址 | 留空（只能选 Google Search Console 验证过的网站，GitHub 仓库无法验证） |
-| 首页网址 | `https://github.com/Miruko2/bilibili-ambient-light` |
+| 官方网址 | 只能选 Google Search Console 里验证过的网站，而且下拉菜单可能只列根域名，`https://miruko2.github.io/bilibili-ambient-light/` 这种带路径的网址多半选不了。下拉菜单里没有就留空 |
+| 首页网址 | `https://miruko2.github.io/bilibili-ambient-light/`（GitHub Pages 开通之前先填 `https://github.com/Miruko2/bilibili-ambient-light`） |
 | 支持网址 | `https://github.com/Miruko2/bilibili-ambient-light/issues` |
 | 成人内容 | 不勾选 |
 

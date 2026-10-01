@@ -55,6 +55,7 @@ Edge 用户也可以从上面的链接安装：页面上方出现提示时，选
 | `tools/generate-assets.mjs` | 生成图标、噪点贴图和商店图标 |
 | `tools/pack.ps1` | 打包上架用的 zip 到 `dist/` |
 | `store/` | 商店截图、宣传图和上架清单 |
+| `docs/` | 项目主页，由 GitHub Pages 发布到 https://miruko2.github.io/bilibili-ambient-light/ |
 | `promo/` | 用 Remotion 制作宣传视频和商店截图的工程 |
 | `.github/` | 仓库页赞助（Sponsor）按钮的配置和收款码原图 |
 
