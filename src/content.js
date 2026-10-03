@@ -152,7 +152,7 @@
 
     update() {
       const s = this.settings;
-      const pageAllowed = !s.videoOnly || location.pathname.startsWith('/video/');
+      const pageAllowed = !s.excludeHome || location.pathname !== '/';
       const pageActive = Boolean(s.enabled && pageAllowed && this.source && document.body);
       const screen = this.player?.getAttribute('data-screen') ?? '';
       const lightActive = pageActive && INLINE_SCREENS.has(screen) && !document.fullscreenElement;

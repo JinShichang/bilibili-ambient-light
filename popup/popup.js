@@ -28,7 +28,7 @@
     {
       title: '页面',
       controls: [
-        { key: 'videoOnly', label: '仅对视频页生效', hint: '仅在 /video/ 视频页启用，首页、番剧及其他页面不生效' },
+        { key: 'excludeHome', label: '排除主页' },
         { key: 'darkTheme', label: '强制深色主题' },
         { key: 'cardOpacity', label: '卡片背景不透明度', format: percent },
         { key: 'headerTransparent', label: '顶栏半透明磨砂' },

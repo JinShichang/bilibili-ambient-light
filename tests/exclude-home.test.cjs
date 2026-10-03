@@ -44,22 +44,23 @@ async function setup(pathname = '/') {
   const controller = context.__biliAmbientController;
   return {
     context, controller, html, wrapper, player,
-    setVideoOnly(value) { storageCallback({ biliAmbientSettings: { newValue: { videoOnly: value } } }, 'local'); },
+    setExcludeHome(value) { storageCallback({ biliAmbientSettings: { newValue: { excludeHome: value } } }, 'local'); },
     navigate(next) { context.location.pathname = next; pollCallback(); },
   };
 }
 test('new and existing saved settings default to unrestricted page behavior', async () => {
   const { context, controller } = await setup('/');
-  assert.equal(context.BiliAmbientSettings.DEFAULTS.videoOnly, false);
-  assert.equal(context.BiliAmbientSettings.sanitize({ spread: 150 }).videoOnly, false);
-  assert.equal(context.BiliAmbientSettings.sanitize({ videoOnly: true }).videoOnly, true);
+  assert.equal(context.BiliAmbientSettings.DEFAULTS.excludeHome, false);
+  assert.equal(context.BiliAmbientSettings.sanitize({ spread: 150 }).excludeHome, false);
+  assert.equal(context.BiliAmbientSettings.sanitize({ videoOnly: true }).excludeHome, false);
+  assert.equal(context.BiliAmbientSettings.sanitize({ excludeHome: true }).excludeHome, true);
   assert.equal(controller.pageActive, true);
   assert.equal(controller.lightActive, true);
 });
 test('restricting the homepage stops rendering and clears all page styling', async () => {
   const s = await setup('/');
   assert.equal(s.html.getAttribute('data-bal'), 'on');
-  s.setVideoOnly(true);
+  s.setExcludeHome(true);
   assert.equal(s.controller.pageActive, false);
   assert.equal(s.controller.lightActive, false);
   assert.equal(s.controller.renderer.running, false);
@@ -68,23 +69,25 @@ test('restricting the homepage stops rendering and clears all page styling', asy
   assert.equal(s.html.vars.size, 0);
   assert.equal(s.wrapper.hasAttribute('data-bal-clear'), false);
   assert.equal(s.player.hasAttribute('data-bal-clear'), false);
-  s.setVideoOnly(false);
+  s.setExcludeHome(false);
   assert.equal(s.controller.pageActive, true);
   assert.equal(s.controller.renderer.running, true);
 });
-test('only the /video/ prefix is allowed, and reused-player SPA transitions recover', async () => {
+test('only the homepage is excluded, and all other SPA routes remain enabled', async () => {
   const s = await setup('/video/BV1xx411c7mD/');
-  s.setVideoOnly(true);
+  s.setExcludeHome(true);
   assert.equal(s.controller.pageActive, true);
-  for (const route of ['/', '/bangumi/play/ep1', '/list/123', '/video', '/videos/BV1', '/foo/video/BV1']) {
+  for (const route of ['/video/BV2', '/bangumi/play/ep1', '/list/123', '/video', '/videos/BV1', '/foo/video/BV1']) {
     s.navigate(route);
+    assert.equal(s.controller.pageActive, true, route);
+    assert.equal(s.controller.renderer.running, true, route);
+    assert.equal(s.html.getAttribute('data-bal'), 'on', route);
+    s.navigate('/');
     assert.equal(s.controller.pageActive, false, route);
     assert.equal(s.controller.renderer.running, false, route);
     assert.equal(s.html.hasAttribute('data-bal'), false, route);
-    s.navigate('/video/BV2');
-    assert.equal(s.controller.pageActive, true);
-    assert.equal(s.controller.renderer.running, true);
   }
+  s.navigate('/video/BV2');
   s.controller.settings.enabled = false;
   s.controller.update();
   assert.equal(s.controller.pageActive, false);
